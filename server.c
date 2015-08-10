@@ -14,7 +14,7 @@
 #include <linux/slab.h> 
 #include <linux/sched.h>
 #include <linux/kmod.h>
-char * dealrequest(char *recvbuf,char *buf2);
+//char * dealrequest(char *recvbuf,char *buf2);
 
 
 
@@ -114,16 +114,57 @@ static void work_handler(struct work_struct *work)
       
         //char *buf2;
         //buf2=dealrequest(recvbuf,buf2);
-        //send to url.py
-        //////////////////////////////////////////
 
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        struct socket *urlsock;
+        struct sockaddr_in s_addr2;  
+        unsigned short portnum2=9999;        
+        memset(&s_addr2,0,sizeof(s_addr2));
+        s_addr2.sin_family=AF_INET;  
+        s_addr2.sin_port=htons(portnum2);  
+        s_addr2.sin_addr.s_addr=in_aton("127.0.0.1");  
+        urlsock=(struct socket *)kmalloc(sizeof(struct socket),GFP_KERNEL);  
+      
+    /*create a socket*/  
+        ret=sock_create_kern(AF_INET, SOCK_STREAM,0,&urlsock);  
+        if(ret<0){  
+            printk("client:socket create error!\n");  
+            return ;  
+        }  
+        ret=urlsock->ops->connect(urlsock,(struct sockaddr *)&s_addr2, sizeof(s_addr2),0);  
+        if(ret!=0){  
+            printk("client:connect error!\n");  
+            return ;  
+        }  
+        //send to url.py
+
+        char sendbuf[]={"client messsage!\r\n\r\n"};
+        int len=sizeof("client message!\r\n\r\n");    
+        struct kvec vecsend;  
+        struct msghdr msgsend;  
+      
+        vecsend.iov_base=recvbuf;  
+        vecsend.iov_len=len;  
+        memset(&msgsend,0,sizeof(msgsend));  
+      
+        ret= kernel_sendmsg(urlsock,&msgsend,&vecsend,1,len);  
+        if(ret<0){  
+            printk("client: kernel_sendmsg error!\n");  
+            return ;   
+        }
+        else if(ret!=len){  
+            printk("client: ret!=len\n");  
+        }  
+        kfree(recvbuf); 
+        //recv from url.py
 
         char *urlpy=NULL;  
         urlpy=kmalloc(1024000,GFP_KERNEL);  
         if(urlpy==NULL)
         {  
             printk("server: recvbuf kmalloc error!\n");  
-            return  0;  
+            return ;  
         }  
         memset(urlpy, 0, sizeof(urlpy));  
 
@@ -133,12 +174,12 @@ static void work_handler(struct work_struct *work)
         memset(&msg3,0,sizeof(msg3));  
         vec2.iov_base=urlpy;  
         vec2.iov_len=1024000;  
-        ret=kernel_recvmsg(sock,&msg3,&vec3,1,1024000,0);  
+        ret=kernel_recvmsg(urlsock,&msg3,&vec3,1,1024000,0);  
+        sock_release(urlsock);  
 
 
-
-        ////////////////////////////////////////
-        kfree(recvbuf); 
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      
          //printk("\nbuf2 de dihzhi:%d\n",buf2);
         //printk("\n\n%s\n\n",buf2);
     
