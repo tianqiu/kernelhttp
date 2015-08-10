@@ -1,1 +1,0 @@
-cmd_/home/qiutian/kernelhttp/server.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/qiutian/kernelhttp/server.ko /home/qiutian/kernelhttp/server.o /home/qiutian/kernelhttp/server.mod.o
