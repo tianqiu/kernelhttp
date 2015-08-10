@@ -46,6 +46,7 @@ static void work_handler(struct work_struct *work)
         vec.iov_len=1024;  
         int ret=0;
         ret=kernel_recvmsg(wsdata->client,&msg,&vec,1,1024,0);  
+         printk("\nrecvbuf==%s\n",recvbuf);
         //printk("receive message:\n%s\n",recvbuf); 
         //printk("receive size=%d\n",ret);  
       
@@ -115,14 +116,10 @@ static void work_handler(struct work_struct *work)
 
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-      
-         //printk("\nbuf2 de dihzhi:%d\n",buf2);
-        //printk("\n\n%s\n\n",buf2);
     
         //send message to client ///////////////////////////////
-        //iFileLen=sizeof(buf2);
+
         len=strlen(urlpy)*sizeof(char);
-        //printk("\n33==%s\nlen=%d\n",buf2,len);
         struct kvec vec2;  
         struct msghdr msg2;  
         vec2.iov_base=urlpy; 
@@ -156,33 +153,33 @@ int myserver(void)
     {  
         printk("server:socket_create error!\n");  
     }  
-    //printk("server:socket_create ok!\n");  
+    printk("server:socket_create ok!\n");  
   
     /*set the socket can be reused*/  
     int val=1;  
     ret= kernel_setsockopt(sock,SOL_SOCKET,SO_REUSEADDR,(char *)&val,sizeof(val));  
     if(ret)
     {  
-       // printk("kernel_setsockopt error!!!!!!!!!!!\n");  
+        printk("kernel_setsockopt error!!!!!!!!!!!\n");  
     }  
   
     /*bind the socket*/  
     ret=sock->ops->bind(sock,(struct sockaddr *)&s_addr,sizeof(struct sockaddr_in));
     if(ret<0)
     {  
-       // printk("server: bind error\n");  
+        printk("server: bind error\n");  
         return ret;  
     }  
-    //printk("server:bind ok!\n");  
+    printk("server:bind ok!\n");  
     
     /*listen*/  
     ret=sock->ops->listen(sock,10);  
     if(ret<0)
     {  
-       // printk("server: listen error\n");  
+        printk("server: listen error\n");  
         return ret;  
     }  
-    //printk("server:listen ok!\n");  
+    printk("server:listen ok!\n");  
     
 
     my_wq = create_workqueue("my_queue");
