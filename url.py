@@ -489,12 +489,14 @@ class Thread(threading.Thread):
             ##WHEN THE WAY IS HTTP:
             if linkway[filenoo] == "http" or False:
                 if eventt & select.EPOLLMSG:
+                    print 'in'
                     #while True:
                     try:
                         aa=connections[filenoo].recv(1024)
                     except:
                         pass
                     httprequests[filenoo] += aa
+                    print('-'*40 + '\n' + httprequests[filenoo])
                     if EOL1 in httprequests[filenoo] or EOL2 in httprequests[filenoo]:
                         print('-'*40 + '\n' + httprequests[filenoo])
                         try:
@@ -514,7 +516,7 @@ class Thread(threading.Thread):
                                 pass
 
                 elif eventt & select.EPOLLPRI:
-                    #print 'o'
+                    print 'o'
                     #while True:
                     try:
                         byteswritten[filenoo] = connections[filenoo].send(httprespones[filenoo])
@@ -554,7 +556,7 @@ if __name__=="__main__":
     serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     serversocket.bind((HTTPIP, HTTPLISTEN))
     serversocket.listen(20000)
-    serversocket.setblocking(0)
+    #serversocket.setblocking(0)
     epoll = select.epoll()
     epoll.register(serversocket.fileno(), select.EPOLLIN)
     try:
@@ -574,7 +576,7 @@ if __name__=="__main__":
                 elif fileno == serversocket.fileno():
                     #print 'a'
                     connection,address=serversocket.accept()
-                    connection.setblocking(0)
+                   # connection.setblocking(0)
                     epoll.register(connection.fileno(),select.EPOLLIN)
                     linkway[connection.fileno()]="http"
                     connections[connection.fileno()] = connection

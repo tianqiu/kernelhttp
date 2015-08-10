@@ -46,7 +46,6 @@ static void work_handler(struct work_struct *work)
         vec.iov_len=1024;  
         int ret=0;
         ret=kernel_recvmsg(wsdata->client,&msg,&vec,1,1024,0);  
-         printk("\nrecvbuf==%s\n",recvbuf);
         //printk("receive message:\n%s\n",recvbuf); 
         //printk("receive size=%d\n",ret);  
       
@@ -77,12 +76,13 @@ static void work_handler(struct work_struct *work)
         }  
         //send to url.py
 
-        int len=sizeof(recvbuf)+1;    
+        int len=strlen(recvbuf)+1;    
         struct kvec vecsend;  
         struct msghdr msgsend;  
       
         vecsend.iov_base=recvbuf;  
         vecsend.iov_len=len;  
+        printk("\nrecvbuf22==%slen==%d\n",recvbuf,len);
         memset(&msgsend,0,sizeof(msgsend));  
       
         ret= kernel_sendmsg(urlsock,&msgsend,&vecsend,1,len);  
@@ -118,7 +118,7 @@ static void work_handler(struct work_struct *work)
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
         //send message to client ///////////////////////////////
-
+        printk("urlpy==%s",urlpy);
         len=strlen(urlpy)*sizeof(char);
         struct kvec vec2;  
         struct msghdr msg2;  
