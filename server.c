@@ -14,8 +14,6 @@
 #include <linux/slab.h> 
 #include <linux/sched.h>
 #include <linux/kmod.h>
-//char * dealrequest(char *recvbuf,char *buf2);
-
 
 
 struct socket *sock;
@@ -26,67 +24,6 @@ struct work_struct_data
     struct socket * client;              //传给处理函数的数据(client socket)  
 };
 
-
-/*
-char * dealrequest(char *recvbuf,char *buf2)
-{
-    char *response=NULL;
-    char *method=NULL;
-    char *url=NULL;
-    char error[]={"HTTP/1.1 200 OK \r\nContent-Type: text/html\r\n\r\n<html><body><p>hello</p><p>There is some errors</p></body><html>"};
-    //char *path=NULL;
-    method=strsep(&recvbuf," ");
-    url=strsep(&recvbuf," ");
-    printk("\nmethod==%s\n",method);
-    printk("\nurl==%s\n",url);
-    if(url==NULL)
-    {
-        printk("\nnullnullnull\n");
-        response=(char *)kmalloc(strlen(error)+1,GFP_KERNEL);
-        strcpy(response,error);
-        return response;
-    }
-    //path=strsep(&url,"?");
-    if(strcmp(url,"/")==0)
-    {
-        struct file *fp;
-        mm_segment_t fs;
-        int ret=0;
-        int iFileLen = 0;
-        loff_t pos;
-        pos = 0;
-        //printk("hello enter\n");
-        fp = filp_open("/home/qiutian/c/www/index3.html", O_RDWR | O_CREAT, 0644);
-        if (IS_ERR(fp)) 
-        {
-       //printk("create file error\n");
-            response=(char *)kmalloc(strlen(error)+1,GFP_KERNEL);
-            strcpy(response,error);
-            return response;
-        }
-        iFileLen = vfs_llseek(fp, 0, SEEK_END);
-       // printk("lenshi:%d", iFileLen);
-        char buf1[iFileLen+1];
-        memset(buf1,0,iFileLen+1);    
-        fs = get_fs();
-        set_fs(KERNEL_DS);
-        ret=vfs_read(fp, buf1, iFileLen, &pos);
-        filp_close(fp, NULL);
-        set_fs(fs);   
-        response=(char *)kmalloc(strlen(buf1)+1,GFP_KERNEL);
-        strcpy(response,buf1);
-        return response;    
-    }
-    else if(strcmp(method,"GET")==0 || strcmp(method,"HEAD")==0)
-    {
-        
-    }
-    response=(char *)kmalloc(strlen(error)+1,GFP_KERNEL);
-    strcpy(response,error);
-    printk("\nout\n");
-    return response; 
-}
-*/
 
 static void work_handler(struct work_struct *work)  
 {
@@ -139,8 +76,7 @@ static void work_handler(struct work_struct *work)
         }  
         //send to url.py
 
-        char sendbuf[]={"client messsage!\r\n\r\n"};
-        int len=sizeof("client message!\r\n\r\n");    
+        int len=sizeof(recvbuf)+1;    
         struct kvec vecsend;  
         struct msghdr msgsend;  
       
@@ -172,8 +108,8 @@ static void work_handler(struct work_struct *work)
         struct msghdr msg3;  
         memset(&vec3,0,sizeof(vec3));  
         memset(&msg3,0,sizeof(msg3));  
-        vec2.iov_base=urlpy;  
-        vec2.iov_len=1024000;  
+        vec3.iov_base=urlpy;  
+        vec3.iov_len=1024000;  
         ret=kernel_recvmsg(urlsock,&msg3,&vec3,1,1024000,0);  
         sock_release(urlsock);  
 
@@ -184,13 +120,12 @@ static void work_handler(struct work_struct *work)
         //printk("\n\n%s\n\n",buf2);
     
         //send message to client ///////////////////////////////
-        int len;
         //iFileLen=sizeof(buf2);
         len=strlen(urlpy)*sizeof(char);
         //printk("\n33==%s\nlen=%d\n",buf2,len);
         struct kvec vec2;  
         struct msghdr msg2;  
-        vec2.iov_base=buf2; 
+        vec2.iov_base=urlpy; 
         vec2.iov_len=len;  
         memset(&msg2,0,sizeof(msg2));
         ret= kernel_sendmsg(wsdata->client,&msg2,&vec2,1,len);
@@ -263,7 +198,6 @@ int myserver(void)
             //return ret; 
             break; 
         }  
-        int ret = 0;  
         if (my_wq) 
         {
             wsdata = (struct work_struct_data *) kmalloc(sizeof(struct work_struct_data), GFP_KERNEL);
