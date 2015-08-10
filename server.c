@@ -27,7 +27,7 @@ struct work_struct_data
 };
 
 
-
+/*
 char * dealrequest(char *recvbuf,char *buf2)
 {
     char *response=NULL;
@@ -77,15 +77,16 @@ char * dealrequest(char *recvbuf,char *buf2)
         strcpy(response,buf1);
         return response;    
     }
-    /*else if(strcmp(method,"GET")==0 || strcmp(method,"HEAD")==0)
+    else if(strcmp(method,"GET")==0 || strcmp(method,"HEAD")==0)
     {
         
-    }*/
+    }
     response=(char *)kmalloc(strlen(error)+1,GFP_KERNEL);
     strcpy(response,error);
     printk("\nout\n");
     return response; 
 }
+*/
 
 static void work_handler(struct work_struct *work)  
 {
@@ -111,8 +112,32 @@ static void work_handler(struct work_struct *work)
         //printk("receive message:\n%s\n",recvbuf); 
         //printk("receive size=%d\n",ret);  
       
-        char *buf2;
-        buf2=dealrequest(recvbuf,buf2);
+        //char *buf2;
+        //buf2=dealrequest(recvbuf,buf2);
+        //send to url.py
+        //////////////////////////////////////////
+
+
+        char *urlpy=NULL;  
+        urlpy=kmalloc(1024000,GFP_KERNEL);  
+        if(urlpy==NULL)
+        {  
+            printk("server: recvbuf kmalloc error!\n");  
+            return  0;  
+        }  
+        memset(urlpy, 0, sizeof(urlpy));  
+
+        struct kvec vec3;  
+        struct msghdr msg3;  
+        memset(&vec3,0,sizeof(vec3));  
+        memset(&msg3,0,sizeof(msg3));  
+        vec2.iov_base=urlpy;  
+        vec2.iov_len=1024000;  
+        ret=kernel_recvmsg(sock,&msg3,&vec3,1,1024000,0);  
+
+
+
+        ////////////////////////////////////////
         kfree(recvbuf); 
          //printk("\nbuf2 de dihzhi:%d\n",buf2);
         //printk("\n\n%s\n\n",buf2);
@@ -120,7 +145,7 @@ static void work_handler(struct work_struct *work)
         //send message to client ///////////////////////////////
         int len;
         //iFileLen=sizeof(buf2);
-        len=strlen(buf2)*sizeof(char);
+        len=strlen(urlpy)*sizeof(char);
         //printk("\n33==%s\nlen=%d\n",buf2,len);
         struct kvec vec2;  
         struct msghdr msg2;  
@@ -128,8 +153,8 @@ static void work_handler(struct work_struct *work)
         vec2.iov_len=len;  
         memset(&msg2,0,sizeof(msg2));
         ret= kernel_sendmsg(wsdata->client,&msg2,&vec2,1,len);
-        kfree(buf2);
-        buf2=NULL;
+        kfree(urlpy);
+        urlpy=NULL;
         //release client socket
         sock_release(wsdata->client);  
 }  
