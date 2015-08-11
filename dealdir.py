@@ -25,7 +25,9 @@ for i in ff:
         size=os.path.getsize(cwd+path+'/'+i)
     times=os.path.getmtime(cwd+path+'/'+i)
     timess=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(times))
-    print '''<tr><td valign="top"></td><td><a href="'''+path+'/'+str(name)+'''">'''+name+'''</a></td><td align="right">'''+str(timess)+'''</td><td align="right">'''+str(size)+'''</td><td>&nbsp;</td></tr>'''
+    uuu=path+'/'+str(name)
+    uuu=uuu.replace('//','/')
+    print '''<tr><td valign="top"></td><td><a href='''+uuu+'>'+name+'''</a></td><td align="right">'''+str(timess)+'''</td><td align="right">'''+str(size)+'''</td><td>&nbsp;</td></tr>'''
 print '''<tr><th colspan="5"><hr></th></tr>'''
 print "</table>"
 print "</body></html>"
